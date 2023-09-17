@@ -68,17 +68,16 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
 
     } catch (HttpClientErrorException ex) {
 
-      switch (ex.getStatusCode()) {
-        case NOT_FOUND:
-          throw new NotFoundException(getErrorMessage(ex));
+      switch (ex.getStatusCode().value()) {
+        case 404 -> throw new NotFoundException(getErrorMessage(ex));
 
-        case UNPROCESSABLE_ENTITY:
-          throw new InvalidInputException(getErrorMessage(ex));
+        case 422 -> throw new InvalidInputException(getErrorMessage(ex));
 
-        default:
+        default -> {
           LOG.warn("Got an unexpected HTTP error: {}, will rethrow it", ex.getStatusCode());
           LOG.warn("Error body: {}", ex.getResponseBodyAsString());
           throw ex;
+        }
       }
     }
   }
